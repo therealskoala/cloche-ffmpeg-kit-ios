@@ -52,14 +52,20 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
-      # The exact library set of the official 'ffmpeg-kit-ios-full' 6.0
-      # release — NOT --full, which also drags in extras the official variant
-      # never shipped (tesseract, sdl, chromaprint, srt, openssl, libaom, and
-      # openh264 — the last is a patent hazard when self-built: Cisco's H.264
-      # grant covers only Cisco's binaries). Encoding H.264 stays on Apple's
-      # videotoolbox. arm64e and Mac Catalyst slices are skipped: the app
-      # ships device arm64 + both simulator slices only.
-      - name: Build iOS xcframeworks (official full set, LGPL)
+      # The official 'ffmpeg-kit-ios-full' 6.0 library set MINUS two
+      # deliberate omissions:
+      #   - NOT --full: that also drags in extras the official variant never
+      #     shipped (tesseract, sdl, chromaprint, srt, openssl, libaom, and
+      #     openh264 — a patent hazard when self-built: Cisco's H.264 grant
+      #     covers only Cisco's binaries).
+      #   - no gnutls/gmp: they exist solely to give FFmpeg network TLS
+      #     (https streaming). Cloche renders local files only, and gnutls's
+      #     bootstrap (gnulib + gtkdocize) is the most fragile stage of the
+      #     whole build. Dropping it loses nothing the app can ever call.
+      # Encoding H.264 stays on Apple's videotoolbox. arm64e and Mac Catalyst
+      # slices are skipped: the app ships device arm64 + both simulator
+      # slices only.
+      - name: Build iOS xcframeworks (Cloche full set, LGPL)
         env:
           # The 2023-era sub-libraries (snappy et al) declare CMake minimums
           # older than CMake 4 accepts; this is CMake's documented escape
@@ -70,8 +76,8 @@ jobs:
             --disable-arm64e --disable-arm64-mac-catalyst --disable-x86-64-mac-catalyst \
             --enable-ios-zlib --enable-ios-audiotoolbox --enable-ios-videotoolbox \
             --enable-ios-avfoundation --enable-ios-bzip2 --enable-ios-libiconv \
-            --enable-fontconfig --enable-freetype --enable-fribidi --enable-gmp \
-            --enable-gnutls --enable-kvazaar --enable-lame --enable-libass \
+            --enable-fontconfig --enable-freetype --enable-fribidi \
+            --enable-kvazaar --enable-lame --enable-libass \
             --enable-libilbc --enable-libtheora --enable-libvorbis --enable-libvpx \
             --enable-libwebp --enable-libxml2 --enable-opencore-amr --enable-opus \
             --enable-shine --enable-snappy --enable-soxr --enable-speex \
