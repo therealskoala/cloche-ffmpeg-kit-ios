@@ -38,7 +38,7 @@ jobs:
       - name: Install build prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config nasm meson ninja-build gperf autogen gettext autopoint
+          sudo apt-get install -y autoconf automake libtool pkg-config nasm meson ninja-build gperf autogen gettext autopoint groff texinfo
 
       - name: Pin NDK 25 (era-matched to ffmpeg-kit 6.0)
         run: |
