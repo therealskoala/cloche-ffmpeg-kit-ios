@@ -98,13 +98,21 @@ jobs:
           cd ../..
           shasum -a 256 ffmpeg-kit-full-6.0-ios-xcframework.zip | tee SHA256SUMS.txt
 
-      - name: Create release
+      - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
+          # The dispatch input reaches the shell only through env — never
+          # interpolated into the script text (expression injection guard).
+          SOURCE_REF: ${{ inputs.source_ref }}
         run: |
           TAG="v6.0-full-lgpl"
-          gh release create "$TAG" \
-            ffmpeg-kit-full-6.0-ios-xcframework.zip SHA256SUMS.txt \
-            --repo "${{ github.repository }}" \
-            --title "FFmpeg-Kit iOS 6.0 full (LGPL)" \
-            --notes "Built unmodified from ffmpeg-kit ${{ inputs.source_ref }} with \`./ios.sh --xcframework --full\` (no GPL libraries). Source: the ffmpeg-kit fork under this account. Licenses: LGPL v3.0 and the individual external-library licenses bundled inside each framework."
+          NOTES="Built unmodified from ffmpeg-kit ${SOURCE_REF} (official archived source; fork under this account) with the official 'full' library set minus gnutls/gmp — no GPL components, no network TLS. Exact flags: see .github/workflows/build.yml. Licenses: LGPL v3.0 plus the external-library licenses bundled inside each framework."
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" ffmpeg-kit-full-6.0-ios-xcframework.zip SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" \
+              ffmpeg-kit-full-6.0-ios-xcframework.zip SHA256SUMS.txt \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "FFmpeg-Kit iOS 6.0 full (LGPL)" \
+              --notes "$NOTES"
+          fi
