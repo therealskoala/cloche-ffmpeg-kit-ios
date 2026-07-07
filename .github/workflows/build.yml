@@ -74,7 +74,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="v6.0-full-lgpl-$(date -u +%Y%m%d)"
+          TAG="v6.0-full-lgpl"
           gh release create "$TAG" \
             ffmpeg-kit-full-6.0-ios-xcframework.zip SHA256SUMS.txt \
             --repo "${{ github.repository }}" \
