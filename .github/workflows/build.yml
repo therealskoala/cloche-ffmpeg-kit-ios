@@ -60,6 +60,11 @@ jobs:
       # videotoolbox. arm64e and Mac Catalyst slices are skipped: the app
       # ships device arm64 + both simulator slices only.
       - name: Build iOS xcframeworks (official full set, LGPL)
+        env:
+          # The 2023-era sub-libraries (snappy et al) declare CMake minimums
+          # older than CMake 4 accepts; this is CMake's documented escape
+          # hatch and applies to every cmake-based lib in the set.
+          CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         run: |
           ./ios.sh --xcframework \
             --disable-arm64e --disable-arm64-mac-catalyst --disable-x86-64-mac-catalyst \
